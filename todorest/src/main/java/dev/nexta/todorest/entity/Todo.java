@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "todo")
+@Table(name = "todos")
 @NoArgsConstructor
 public class  Todo {
     @Id
