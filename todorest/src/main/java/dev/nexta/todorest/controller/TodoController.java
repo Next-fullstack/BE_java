@@ -2,6 +2,7 @@ package dev.nexta.todorest.controller;
 
 import dev.nexta.todorest.entity.Todo;
 import dev.nexta.todorest.services.TodoService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,9 +14,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PathVariable;
 
 
+@SecurityRequirement(name = "Bearer Authentication")
 @RestController
 @RequestMapping("/api/todos")
-@CrossOrigin(origins = "http://localhost:3000")
 public class TodoController {
     private final TodoService todoService;
 

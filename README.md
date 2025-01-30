@@ -1,14 +1,7 @@
-### API Endpoint
-```http
-GET    /api/todos
-PUT    /api/todos/:i
-PUT    /api/todos/:i/status
-PUT    /api/todos/:i/priority
-POST   /api/todos
-DELETE /api/todos/:id
+# Todo REST API
 
-POST   /auth/register
-POST   /auth/login
-
+## Swagger UI
+```
+http://howt:port/swagger-ui/index.html
 ```
 
