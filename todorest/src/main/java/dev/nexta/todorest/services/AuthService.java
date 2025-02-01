@@ -1,11 +1,12 @@
 package dev.nexta.todorest.services;
 
-import dev.nexta.todorest.entity.User;
+import dev.nexta.todorest.dtos.AuthDto;
+import dev.nexta.todorest.responses.AuthResponse;
 
 public interface AuthService {
     
-    public User signup(User input);
+    AuthResponse signup(AuthDto input);
 
-    public User authenticate(User input);
+    AuthResponse authenticate(AuthDto input);
 
 }

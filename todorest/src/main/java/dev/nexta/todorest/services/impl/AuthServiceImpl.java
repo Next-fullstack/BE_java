@@ -1,8 +1,11 @@
 package dev.nexta.todorest.services.impl;
 
+import dev.nexta.todorest.dtos.AuthDto;
 import dev.nexta.todorest.entity.User;
 import dev.nexta.todorest.repository.UserRepository;
+import dev.nexta.todorest.responses.AuthResponse;
 import dev.nexta.todorest.services.AuthService;
+import dev.nexta.todorest.services.JwtService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,28 +20,39 @@ public class AuthServiceImpl implements AuthService {
     
     private final AuthenticationManager authenticationManager;
 
+    private final JwtService jwtService;
+
     public AuthServiceImpl(
         UserRepository userRepository,
         AuthenticationManager authenticationManager,
-        PasswordEncoder passwordEncoder
+        PasswordEncoder passwordEncoder,
+        JwtService jwtService
     ) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
     }
 
     @Override
-    public User signup(User input) {
+    public AuthResponse signup(AuthDto input) {
         User user = User.builder()
                 .username(input.getUsername())
                 .password(passwordEncoder.encode(input.getPassword()))
                 .build();
+        userRepository.save(user);
 
-        return userRepository.save(user);
+        String jwtToken = jwtService.generateToken(user);
+
+        return AuthResponse.builder()
+                .username(user.getUsername())
+                .token(jwtToken)
+                .expiresIn(jwtService.getExpirationTime())
+                .build();
     }
 
     @Override
-    public User authenticate(User input) {
+    public AuthResponse authenticate(AuthDto input) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         input.getUsername(),
@@ -46,7 +60,16 @@ public class AuthServiceImpl implements AuthService {
                 )
         );
 
-        return userRepository.findByUsername(input.getUsername())
+        User user = userRepository.findByUsername(input.getUsername())
                 .orElseThrow();
+
+        String jwtToken = jwtService.generateToken(user);
+
+        return AuthResponse.builder()
+                .username(user.getUsername())
+                .token(jwtToken)
+                .expiresIn(jwtService.getExpirationTime())
+                .build();
     }
+
 }
