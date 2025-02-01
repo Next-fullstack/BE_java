@@ -1,6 +1,6 @@
 package dev.nexta.todorest.controller;
 
-import dev.nexta.todorest.entity.Todo;
+import dev.nexta.todorest.dtos.TodoDto;
 import dev.nexta.todorest.services.TodoService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.ResponseEntity;
@@ -24,16 +24,16 @@ public class TodoController {
         this.todoService = todoService;
     }
     @GetMapping
-    public List<Todo> getAllTodos(){
+    public List<TodoDto> getAllTodos(){
         return todoService.getAllTodos();
     }
 
     @PostMapping
-    public Todo createTodo(@RequestBody Todo todo) {
-        if (todo.getPriority() != null && !todo.getPriority().trim().isEmpty()) {
-            return todoService.createTodoWithPriority(todo);
+    public TodoDto createTodo(@RequestBody TodoDto todoDto) {
+        if (todoDto.getPriority() != null && !todoDto.getPriority().trim().isEmpty()) {
+            return todoService.createTodoWithPriority(todoDto);
         } else {
-            return todoService.createTodo(todo);
+            return todoService.createTodo(todoDto);
         }
     }
 
@@ -43,19 +43,19 @@ public class TodoController {
         return ResponseEntity.noContent().build();
     }
     @PutMapping("/{id}/status")
-    public ResponseEntity<Todo> toggleTodoDone(@PathVariable String id){
-        Todo updatedTodo = todoService.toggleTodoDone(id);
+    public ResponseEntity<TodoDto> toggleTodoDone(@PathVariable String id){
+        TodoDto updatedTodo = todoService.toggleTodoDone(id);
         return ResponseEntity.ok(updatedTodo);
     }
     @PutMapping("/{id}")
-    public ResponseEntity<Todo> updateTodo(@PathVariable String id, @RequestBody Todo todo){
-        Todo updatedTodo = todoService.updateTodo(id,todo);
+    public ResponseEntity<TodoDto> updateTodo(@PathVariable String id, @RequestBody TodoDto todoDto){
+        TodoDto updatedTodo = todoService.updateTodo(id,todoDto);
         return ResponseEntity.ok(updatedTodo);
     }
 
     @PutMapping("/{id}/priority")
-    public ResponseEntity<Todo> updateTodoPriority(@PathVariable String id, @RequestBody Map<String, String> priority) {
-        Todo updatedTodo = todoService.updateTodoPriority(id, priority.get("priority"));
+    public ResponseEntity<TodoDto> updateTodoPriority(@PathVariable String id, @RequestBody Map<String, String> priority) {
+        TodoDto updatedTodo = todoService.updateTodoPriority(id, priority.get("priority"));
         return ResponseEntity.ok(updatedTodo);
     }
 

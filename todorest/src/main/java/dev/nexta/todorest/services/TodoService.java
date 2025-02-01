@@ -1,5 +1,6 @@
 package dev.nexta.todorest.services;
 
+import dev.nexta.todorest.dtos.TodoDto;
 import dev.nexta.todorest.entity.Todo;
 import dev.nexta.todorest.repository.TodoRepository;
 import org.springframework.http.HttpStatus;
@@ -7,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class TodoService {
@@ -16,22 +18,23 @@ public class TodoService {
         this.todoRepository = todoRepository;
     }
 
-    public List<Todo> getAllTodos() {
-        return todoRepository.findAll();
+    public List<TodoDto> getAllTodos() {
+        return todoRepository.findAll().stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
     }
 
-    public Todo createTodo(Todo todo) {
-        if (todo.getTodo() == null || todo.getTodo().trim().isEmpty()) {
-            throw new IllegalArgumentException("Todo description cannot be null or empty");
-        }
-        return todoRepository.save(todo);
+    public TodoDto createTodo(TodoDto todoDto) {
+        todoDto.setPriority("low");
+        return convertToDto(todoRepository.save(convertToEntity(todoDto)));
     }
 
-    public Todo createTodoWithPriority(Todo todo) {
-        if (todo.getPriority() == null || todo.getPriority().trim().isEmpty()) {
+    public TodoDto createTodoWithPriority(TodoDto todoDto) {
+        if (todoDto.getPriority() == null || todoDto.getPriority().trim().isEmpty()) {
             throw new IllegalArgumentException("Priority cannot be null or empty");
         }
-        return todoRepository.save(todo);
+        Todo todo = convertToEntity(todoDto);
+        return convertToDto(todoRepository.save(todo));
     }
 
     public void deleteTodo(String id) {
@@ -41,24 +44,42 @@ public class TodoService {
         todoRepository.deleteById(id);
     }
 
-    public Todo toggleTodoDone(String id) {
+    public TodoDto toggleTodoDone(String id) {
         Todo todo = todoRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Todo not Found"));
         todo.setDone(!todo.isDone());
-        return todoRepository.save(todo);
+        return convertToDto(todoRepository.save(todo));
     }
 
-    public Todo updateTodo(String id, Todo updatedTodo) {
+    public TodoDto updateTodo(String id, TodoDto updatedTodoDto) {
         Todo existingTodo = todoRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Todo not Found"));
-        existingTodo.setTodo(updatedTodo.getTodo());
-        existingTodo.setDone(updatedTodo.isDone());
-        return todoRepository.save(existingTodo);
+        existingTodo.setTodo(updatedTodoDto.getTodo());
+        existingTodo.setDone(updatedTodoDto.isDone());
+        return convertToDto(todoRepository.save(existingTodo));
     }
 
-    public Todo updateTodoPriority(String id, String priority) {
+    public TodoDto updateTodoPriority(String id, String priority) {
         Todo existingTodo = todoRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Todo not found"));
         existingTodo.setPriority(priority);
-        return todoRepository.save(existingTodo);
+        return convertToDto(todoRepository.save(existingTodo));
     }
 
+    private TodoDto convertToDto(Todo todo) {
+        return TodoDto.builder()
+                .id(todo.getId())
+                .todo(todo.getTodo())
+                .done(todo.isDone())
+                .createdAt(todo.getCreatedAt())
+                .priority(todo.getPriority())
+                .build();
+    }
+
+    private Todo convertToEntity(TodoDto todoDto) {
+        return Todo.builder()
+                .id(todoDto.getId())
+                .todo(todoDto.getTodo())
+                .done(todoDto.isDone())
+                .priority(todoDto.getPriority())
+                .build();
+    }
 }

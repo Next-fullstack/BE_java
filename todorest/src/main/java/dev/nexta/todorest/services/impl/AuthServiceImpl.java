@@ -1,6 +1,7 @@
 package dev.nexta.todorest.services.impl;
 
 import dev.nexta.todorest.dtos.AuthDto;
+import dev.nexta.todorest.dtos.UserDto;
 import dev.nexta.todorest.entity.User;
 import dev.nexta.todorest.repository.UserRepository;
 import dev.nexta.todorest.responses.AuthResponse;
@@ -35,11 +36,12 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public AuthResponse signup(AuthDto input) {
-        User user = User.builder()
-                .username(input.getUsername())
-                .password(passwordEncoder.encode(input.getPassword()))
+    public AuthResponse signup(AuthDto authDto) {
+        UserDto userDto = UserDto.builder()
+                .username(authDto.getUsername())
+                .password(passwordEncoder.encode(authDto.getPassword()))
                 .build();
+        User user = convertToEntity(userDto);
         userRepository.save(user);
 
         String jwtToken = jwtService.generateToken(user);
@@ -52,15 +54,15 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public AuthResponse authenticate(AuthDto input) {
+    public AuthResponse authenticate(AuthDto authDto) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        input.getUsername(),
-                        input.getPassword()
+                        authDto.getUsername(),
+                        authDto.getPassword()
                 )
         );
 
-        User user = userRepository.findByUsername(input.getUsername())
+        User user = userRepository.findByUsername(authDto.getUsername())
                 .orElseThrow();
 
         String jwtToken = jwtService.generateToken(user);
@@ -69,6 +71,24 @@ public class AuthServiceImpl implements AuthService {
                 .username(user.getUsername())
                 .token(jwtToken)
                 .expiresIn(jwtService.getExpirationTime())
+                .build();
+    }
+
+    @Override
+    public UserDto convertToDto(User user) {
+        return UserDto.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .password(user.getPassword())
+                .build();
+    }
+
+    @Override
+    public User convertToEntity(UserDto userDto) {
+        return User.builder()
+                .id(userDto.getId())
+                .username(userDto.getUsername())
+                .password(userDto.getPassword())
                 .build();
     }
 

@@ -1,6 +1,7 @@
 package dev.nexta.todorest.controller;
 
 import dev.nexta.todorest.dtos.AuthDto;
+import dev.nexta.todorest.dtos.UserDto;
 import dev.nexta.todorest.responses.AuthResponse;
 import dev.nexta.todorest.services.AuthService;
 import org.springframework.http.ResponseEntity;
@@ -20,12 +21,12 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@RequestBody AuthDto input) {
-        return ResponseEntity.ok(authService.signup(input));
+    public ResponseEntity<AuthResponse> register(@RequestBody AuthDto authDto) {
+        return ResponseEntity.ok(authService.signup(authDto));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> authenticate(@RequestBody AuthDto input) {
-        return ResponseEntity.ok(authService.authenticate(input));
+    public ResponseEntity<AuthResponse> authenticate(@RequestBody AuthDto authDto) {
+        return ResponseEntity.ok(authService.authenticate(authDto));
     }
 }
